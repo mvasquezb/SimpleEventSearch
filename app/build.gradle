@@ -15,7 +15,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String", "googleApiKey", '"AIzaSyBVTeoxTiSEbN1baOOKlKgRda-TZ7phA9w"'
+        buildConfigField "String", "googleApiKey", '"AIzaSyAV_BahmMtOLqolofFoy5qBwq3JvDRQCJU"'
     }
     buildTypes {
         release {

@@ -19,6 +19,7 @@ class MainViewModel : ViewModel() {
     var selectedPlace: PlaceResult? = null
 
     private fun searchPlace(query: String) {
+        _placeError.value = null
         _loading.value = true
         placesClient.query(query)
             .addOnCompleteListener { _loading.value = false }
