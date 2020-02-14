@@ -4,7 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
+import com.pmvb.simpleeventsearch.util.PlacesApiClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -21,6 +23,8 @@ class MainViewModel : ViewModel() {
     private val _placeResults = MutableLiveData<List<PlaceResult>>()
     val placeResults: LiveData<List<PlaceResult>> = _placeResults
 
+    private val placesClient = PlacesApiClient()
+
     init {
         queryChannel
             .asFlow()
@@ -30,7 +34,21 @@ class MainViewModel : ViewModel() {
     }
 
     private fun searchPlace(query: String) {
-        _placeResults.value = listOf()
+        placesClient.query(query).addOnSuccessListener {
+            if (it.autocompletePredictions.isNotEmpty()) {
+                _placeResults.value = buildPlaceResults(it.autocompletePredictions)
+            }
+        }
+    }
+
+    private fun buildPlaceResults(predictions: List<AutocompletePrediction>): List<PlaceResult> {
+        return predictions.map {
+            PlaceResult(
+                placeId = it.placeId,
+                primaryText = it.getPrimaryText(null).toString(),
+                secondaryText = it.getSecondaryText(null).toString()
+            )
+        }
     }
 
     fun onQuery(query: String) {
