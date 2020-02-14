@@ -3,42 +3,32 @@ package com.pmvb.simpleeventsearch.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
 import com.pmvb.simpleeventsearch.util.PlacesApiClient
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 class MainViewModel : ViewModel() {
-    private val queryChannel = ConflatedBroadcastChannel<String>()
-
     private val _placeResults = MutableLiveData<List<PlaceResult>>()
     val placeResults: LiveData<List<PlaceResult>> = _placeResults
+    private val _loading = MutableLiveData<Boolean>().apply { value = false }
+    val loading: LiveData<Boolean> = _loading
+    private val _placeError = MutableLiveData<Exception>()
+    val placeError: LiveData<Exception> = _placeError
 
     private val placesClient = PlacesApiClient()
-
-    init {
-        queryChannel
-            .asFlow()
-            .debounce(QUERY_SPAN)
-            .onEach { searchPlace(it) }
-            .launchIn(viewModelScope)
-    }
+    var selectedPlace: PlaceResult? = null
 
     private fun searchPlace(query: String) {
-        placesClient.query(query).addOnSuccessListener {
-            if (it.autocompletePredictions.isNotEmpty()) {
+        _loading.value = true
+        placesClient.query(query)
+            .addOnCompleteListener { _loading.value = false }
+            .addOnSuccessListener {
                 _placeResults.value = buildPlaceResults(it.autocompletePredictions)
             }
-        }
+            .addOnFailureListener {
+                _placeError.value = it
+            }
+
     }
 
     private fun buildPlaceResults(predictions: List<AutocompletePrediction>): List<PlaceResult> {
@@ -52,7 +42,9 @@ class MainViewModel : ViewModel() {
     }
 
     fun onQuery(query: String) {
-        queryChannel.offer(query)
+        if (query.isNotEmpty()) {
+            searchPlace(query)
+        }
     }
 
     companion object {
