@@ -87,7 +87,7 @@ class MainFragment : Fragment() {
     private fun selectPlace(place: PlaceResult) {
         selectedText.text = "Selected: ${place.primaryText}, ${place.secondaryText}"
         searchResults.visibility = View.GONE
-        selectedText.visibility = View.VISIBLE
+        selectionContainer.visibility = View.VISIBLE
         viewModel.selectedPlace = place
     }
 
@@ -98,7 +98,7 @@ class MainFragment : Fragment() {
             if (it?.isNotEmpty() == true) {
                 viewModel.onQuery(it.toString())
                 emptyPlaceholder.visibility = View.GONE
-                selectedText.visibility = View.GONE
+                selectionContainer.visibility = View.GONE
             }
         }
     }

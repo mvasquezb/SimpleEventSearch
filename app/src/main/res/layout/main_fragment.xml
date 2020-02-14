@@ -20,12 +20,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/selectedText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/selectionContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:gravity="center_vertical|fill_horizontal"
         app:layout_constraintTop_toBottomOf="@+id/searchField"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <TextView
+            android:id="@+id/selectedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"/>
+
+        <EditText
+            android:id="@+id/radiusField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Radius in km"
+            android:layout_gravity="center|end"
+            android:inputType="number"/>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchResults"
