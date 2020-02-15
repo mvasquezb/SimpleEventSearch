@@ -4,4 +4,5 @@
     <string name="no_results_placeholder">No results</string>
     <string name="hint_radius_in_km">Radius in km</string>
     <string name="cta_search_events">Search Events in this area</string>
+    <string name="place_selection">Events %1$s around %2$s</string>
 </resources>

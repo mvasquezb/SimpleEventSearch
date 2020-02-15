@@ -32,7 +32,7 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity()).get(MainViewModel::class.java)
 
         setupViewModel()
     }
@@ -116,7 +116,7 @@ class MainFragment : Fragment() {
         radiusField.setOnEditorActionListener { textView, actionCode, keyEvent ->
             when (actionCode) {
                 IME_ACTION_CODE -> {
-                    viewModel.selectedRadius = textView.text.toString().toInt()
+                    viewModel.selectedRadius = "0${textView.text}".toInt()
                     true
                 }
                 else -> false

@@ -4,11 +4,16 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.pmvb.simpleeventsearch.data.base.PlaceDetails
 import com.pmvb.simpleeventsearch.data.base.PlaceEvent
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
+import com.pmvb.simpleeventsearch.data.remote.EventApiClient
 import com.pmvb.simpleeventsearch.data.remote.PlacesApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
     private val _placeResults = MutableLiveData<List<PlaceResult>>()
@@ -23,6 +28,8 @@ class MainViewModel : ViewModel() {
     val eventResults: LiveData<List<PlaceEvent>> = _eventResults
 
     private val placesClient = PlacesApiClient()
+    private val eventsClient = EventApiClient()
+
     var selectedPlace: PlaceResult? = null
     var selectedRadius: Int = 0
 
@@ -71,6 +78,7 @@ class MainViewModel : ViewModel() {
                     var zipCode = ""
                     var city = ""
                     var country = ""
+                    var countryCode = ""
                     components.forEach { component ->
                         if (component.types.contains("postal_code")) {
                             zipCode = component.name
@@ -80,6 +88,7 @@ class MainViewModel : ViewModel() {
                         }
                         if (component.types.contains("country")) {
                             country = component.name
+                            countryCode = component.shortName ?: ""
                         }
                     }
                     PlaceDetails(
@@ -89,16 +98,30 @@ class MainViewModel : ViewModel() {
                         latLng = it.place.latLng!!.latitude to it.place.latLng!!.longitude,
                         zipCode = zipCode,
                         city = city,
-                        country = country
+                        country = country,
+                        countryCode = countryCode
                     )
+                }?.let { placeDetails ->
+                    Log.d("mainviewmodel", "placedetails: $placeDetails")
+                    viewModelScope.launch(Dispatchers.IO) {
+                        val events = eventsClient.searchEvents(
+                            zipCode = placeDetails.zipCode,
+                            latLng = placeDetails.latLng,
+                            countryCode = placeDetails.countryCode.toLowerCase(),
+                            radius = radius.toDouble()
+                        )
+                        Log.e("mainviewmodel", "events: $events")
+                        withContext(Dispatchers.Main) {
+                            _eventsReady.value = true
+                            _eventResults.value = events
+                            _loading.value = false
+                        }
+                    }
                 }
-                Log.d("mainviewmodel", "placedetails: $placeDetails")
-                _eventsReady.value = true
             }
             .addOnFailureListener {
                 _eventResults.value = listOf()
             }
-        _loading.value = false
     }
 
     companion object {
