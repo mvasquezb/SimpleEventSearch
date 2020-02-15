@@ -1,7 +1,6 @@
 package com.pmvb.simpleeventsearch.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pmvb.simpleeventsearch.R
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
-import com.pmvb.simpleeventsearch.util.observeOnce
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
@@ -63,13 +61,14 @@ class MainFragment : Fragment() {
             }
         })
 
-        viewModel.eventsReady.observeOnce(viewLifecycleOwner, Observer {
-            if (it) {
+        viewModel.eventsReady.observe(viewLifecycleOwner, Observer {
+            if (it == true) {
                 parentFragmentManager
                     .beginTransaction()
                     .replace(R.id.container, EventsFragment.newInstance())
                     .addToBackStack(EventsFragment.TAG)
                     .commit()
+                viewModel.transitionToEvents()
             }
         })
     }
@@ -85,7 +84,6 @@ class MainFragment : Fragment() {
     }
 
     private fun setupPlaceResults(placeResults: List<PlaceResult>) {
-        Log.e("mainfragment", "size: ${placeResults.size}. places: $placeResults")
         val adapter = PlacesAdapter(requireContext(), placeResults) {
             selectPlace(it)
         }

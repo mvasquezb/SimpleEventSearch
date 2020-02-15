@@ -76,9 +76,9 @@ class TicketmasterApi : EventSearchClient {
                                 PlaceEvent(
                                     name = eventNode.getString(API_RESPONSE_EVENT_NAME),
                                     location = venueNode?.optString(API_RESPONSE_VENUE_NAME) ?: "",
-                                    startDate = startDate.getString(
+                                    startDate = startDate.optString(
                                         API_RESPONSE_EVENT_DATE_START_DATETIME
-                                    ).toDate(),
+                                    )?.toDate(),
                                     url = eventNode.optString(API_RESPONSE_EVENT_URL, "")
                                 )
                             }

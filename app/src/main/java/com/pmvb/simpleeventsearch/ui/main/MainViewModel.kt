@@ -1,6 +1,5 @@
 package com.pmvb.simpleeventsearch.ui.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,7 +21,7 @@ class MainViewModel : ViewModel() {
     val loading: LiveData<Boolean> = _loading
     private val _placeError = MutableLiveData<Exception>()
     val placeError: LiveData<Exception> = _placeError
-    private val _eventsReady = MutableLiveData<Boolean>()
+    private val _eventsReady = MutableLiveData<Boolean>().apply { value = false }
     val eventsReady: LiveData<Boolean> = _eventsReady
     private val _eventResults = MutableLiveData<List<PlaceEvent>>()
     val eventResults: LiveData<List<PlaceEvent>> = _eventResults
@@ -102,7 +101,6 @@ class MainViewModel : ViewModel() {
                         countryCode = countryCode
                     )
                 }?.let { placeDetails ->
-                    Log.d("mainviewmodel", "placedetails: $placeDetails")
                     viewModelScope.launch(Dispatchers.IO) {
                         val events = eventsClient.searchEvents(
                             zipCode = placeDetails.zipCode,
@@ -110,7 +108,6 @@ class MainViewModel : ViewModel() {
                             countryCode = placeDetails.countryCode.toLowerCase(),
                             radius = radius.toDouble()
                         )
-                        Log.e("mainviewmodel", "events: $events")
                         withContext(Dispatchers.Main) {
                             _eventsReady.value = true
                             _eventResults.value = events
@@ -122,6 +119,10 @@ class MainViewModel : ViewModel() {
             .addOnFailureListener {
                 _eventResults.value = listOf()
             }
+    }
+
+    fun transitionToEvents() {
+        _eventsReady.value = false
     }
 
     companion object {

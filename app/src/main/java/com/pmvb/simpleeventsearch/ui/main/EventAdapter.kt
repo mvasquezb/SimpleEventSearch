@@ -38,6 +38,6 @@ class EventVH(root: View) : RecyclerView.ViewHolder(root) {
     fun bind(event: PlaceEvent) {
         eventName.text = event.name
         eventLocation.text = event.location
-        eventDate.text = event.startDate.format("yyyy-MM-dd HH:mm")
+        eventDate.text = event.startDate?.format("yyyy-MM-dd HH:mm") ?: "Date TBA"
     }
 }

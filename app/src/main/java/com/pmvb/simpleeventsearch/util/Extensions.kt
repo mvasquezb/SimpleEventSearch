@@ -11,8 +11,8 @@ import java.util.*
 fun <T> LiveData<T>.observeOnce(owner: LifecycleOwner, observer: Observer<T>) {
     observe(owner, object : Observer<T> {
         override fun onChanged(t: T) {
-            observer.onChanged(t)
             removeObserver(this)
+            observer.onChanged(t)
         }
     })
 }
