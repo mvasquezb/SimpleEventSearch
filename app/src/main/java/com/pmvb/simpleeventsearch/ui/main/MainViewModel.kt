@@ -25,12 +25,14 @@ class MainViewModel : ViewModel() {
     val eventsReady: LiveData<Boolean> = _eventsReady
     private val _eventResults = MutableLiveData<List<PlaceEvent>>()
     val eventResults: LiveData<List<PlaceEvent>> = _eventResults
-
     private val placesClient = PlacesApiClient()
+
     private val eventsClient = EventApiClient()
 
     var selectedPlace: PlaceResult? = null
     var selectedRadius: Int = 0
+    private val _selectedEvent = MutableLiveData<PlaceEvent>()
+    val selectedEvent: LiveData<PlaceEvent> = _selectedEvent
 
     private fun searchPlace(query: String) {
         _placeError.value = null
@@ -123,6 +125,14 @@ class MainViewModel : ViewModel() {
 
     fun transitionToEvents() {
         _eventsReady.value = false
+    }
+
+    fun selectEvent(event: PlaceEvent) {
+        _selectedEvent.value = event
+    }
+
+    fun transitionToEventDetailComplete() {
+        _selectedEvent.value = null
     }
 
     companion object {

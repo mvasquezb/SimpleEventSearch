@@ -1,6 +1,11 @@
 @file:JvmName("ExtensionUtils")
 package com.pmvb.simpleeventsearch.util
 
+import android.content.Context
+import android.content.Intent
+import android.content.Intent.ACTION_VIEW
+import android.net.Uri
+import android.webkit.URLUtil
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -43,4 +48,12 @@ fun String.toDate(format: String): Date {
 
 fun String.toDate(format: String, locale: Locale): Date {
     return SimpleDateFormat(format, locale).parse(this)
+}
+
+fun Context.openLink(url: String) {
+    if (!URLUtil.isValidUrl(url)) {
+        return
+    }
+    val intent = Intent(ACTION_VIEW, Uri.parse(url))
+    startActivity(intent)
 }
