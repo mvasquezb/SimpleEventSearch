@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.pmvb.simpleeventsearch.EventDetailFragment
 import com.pmvb.simpleeventsearch.R
 import com.pmvb.simpleeventsearch.data.base.PlaceEvent
+import com.pmvb.simpleeventsearch.util.observeOnce
 import kotlinx.android.synthetic.main.fragment_events.*
 
 class EventsFragment : Fragment() {
@@ -40,11 +42,25 @@ class EventsFragment : Fragment() {
             }
         })
 
+        viewModel.selectedEvent.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                goToEventDetail(it)
+            }
+        })
+
         selectedPlaceLabel.text = getString(
             R.string.place_selection,
             "${viewModel.selectedRadius}km",
             "${viewModel.selectedPlace?.primaryText}, ${viewModel.selectedPlace?.secondaryText}"
         )
+    }
+
+    private fun goToEventDetail(event: PlaceEvent) {
+        parentFragmentManager
+            .beginTransaction()
+            .replace(R.id.container, EventDetailFragment.newInstance())
+            .addToBackStack(EventDetailFragment.TAG)
+            .commit()
     }
 
     private fun hideEmptyPlaceholder() {
@@ -58,7 +74,7 @@ class EventsFragment : Fragment() {
 
     private fun setupEventList(events: List<PlaceEvent>) {
         hideEmptyPlaceholder()
-        val adapter = EventAdapter(requireContext(), events)
+        val adapter = EventAdapter(requireContext(), events) { viewModel.selectEvent(it) }
         eventList.adapter = adapter
         eventList.visibility = VISIBLE
     }

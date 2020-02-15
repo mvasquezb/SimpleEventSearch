@@ -9,5 +9,6 @@ data class PlaceEvent(
     val location: String,
     val startDate: Date? = null,
     val endDate: Date? = null,
-    val url: String? = null
+    val url: String? = null,
+    val source: String
 ) : Serializable

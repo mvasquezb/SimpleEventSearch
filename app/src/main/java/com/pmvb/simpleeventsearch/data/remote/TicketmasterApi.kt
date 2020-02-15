@@ -45,7 +45,7 @@ class TicketmasterApi : EventSearchClient {
         latLng: Pair<Double, Double>?,
         countryCode: String?,
         radius: Double?
-    ): List<PlaceEvent> = suspendCoroutine {
+    ): List<PlaceEvent> = suspendCoroutine { continuation ->
         AndroidNetworking.get("$apiDomain$eventDiscoveryUrl")
             .addQueryParameter(FIELD_API_KEY, BuildConfig.ticketmasterKey)
             .addQueryParameter(FIELD_SIZE, FIELD_SIZE_VALUE.toString())
@@ -68,28 +68,35 @@ class TicketmasterApi : EventSearchClient {
                             }
                             .map {
                                 val eventNode = eventsArray.getJSONObject(it)
-                                val venuesNode = eventNode.optJSONArray(API_RESPONSE_VENUES)
+                                val dataContainer = eventNode.getJSONObject(API_RESPONSE_CONTAINER)
+                                val venuesNode = dataContainer.optJSONArray(API_RESPONSE_VENUES)
                                 val venueNode = venuesNode?.optJSONObject(0)
                                 val datesNode = eventNode.getJSONObject(API_RESPONSE_EVENT_DATES)
                                 val startDate =
                                     datesNode.getJSONObject(API_RESPONSE_EVENT_DATE_START)
+                                val startDateStr = startDate.optString(
+                                    API_RESPONSE_EVENT_DATE_START_DATETIME, ""
+                                )
                                 PlaceEvent(
                                     name = eventNode.getString(API_RESPONSE_EVENT_NAME),
                                     location = venueNode?.optString(API_RESPONSE_VENUE_NAME) ?: "",
-                                    startDate = startDate.optString(
-                                        API_RESPONSE_EVENT_DATE_START_DATETIME
-                                    )?.toDate(),
-                                    url = eventNode.optString(API_RESPONSE_EVENT_URL, "")
+                                    startDate = if (startDateStr.isNotEmpty()) {
+                                        startDateStr.toDate()
+                                    } else {
+                                        null
+                                    },
+                                    url = eventNode.optString(API_RESPONSE_EVENT_URL, ""),
+                                    source = "TicketMaster"
                                 )
                             }
-                        it.resumeWith(Result.success(events))
+                        continuation.resumeWith(Result.success(events))
                     }
                 }
 
                 override fun onError(anError: ANError?) {
                     anError?.printStackTrace()
                     Log.e("TicketMasterApi", "request error: $anError")
-                    it.resumeWithException(anError ?: Exception("Something happened"))
+                    continuation.resumeWithException(anError ?: Exception("Something happened"))
                 }
             })
     }
