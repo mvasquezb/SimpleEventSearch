@@ -5,9 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.libraries.places.api.model.AutocompletePrediction
+import com.pmvb.simpleeventsearch.data.base.PlaceDetails
 import com.pmvb.simpleeventsearch.data.base.PlaceEvent
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
-import com.pmvb.simpleeventsearch.util.PlacesApiClient
+import com.pmvb.simpleeventsearch.data.remote.PlacesApiClient
 
 class MainViewModel : ViewModel() {
     private val _placeResults = MutableLiveData<List<PlaceResult>>()
@@ -16,7 +17,7 @@ class MainViewModel : ViewModel() {
     val loading: LiveData<Boolean> = _loading
     private val _placeError = MutableLiveData<Exception>()
     val placeError: LiveData<Exception> = _placeError
-    private val _eventsReady = MutableLiveData<Boolean>().apply { value = false }
+    private val _eventsReady = MutableLiveData<Boolean>()
     val eventsReady: LiveData<Boolean> = _eventsReady
     private val _eventResults = MutableLiveData<List<PlaceEvent>>()
     val eventResults: LiveData<List<PlaceEvent>> = _eventResults
@@ -64,8 +65,39 @@ class MainViewModel : ViewModel() {
 
     private fun searchEvents(place: PlaceResult, radius: Int) {
         _loading.value = true
-        _eventsReady.value = true
-        _eventResults.value = listOf()
+        placesClient.getPlaceDetails(placeId = place.placeId)
+            .addOnSuccessListener {
+                val placeDetails = it.place.addressComponents?.asList()?.let { components ->
+                    var zipCode = ""
+                    var city = ""
+                    var country = ""
+                    components.forEach { component ->
+                        if (component.types.contains("postal_code")) {
+                            zipCode = component.name
+                        }
+                        if (component.types.contains("locality")) {
+                            city = component.name
+                        }
+                        if (component.types.contains("country")) {
+                            country = component.name
+                        }
+                    }
+                    PlaceDetails(
+                        placeId = place.placeId,
+                        address = it.place.address!!,
+                        name = it.place.name!!,
+                        latLng = it.place.latLng!!.latitude to it.place.latLng!!.longitude,
+                        zipCode = zipCode,
+                        city = city,
+                        country = country
+                    )
+                }
+                Log.d("mainviewmodel", "placedetails: $placeDetails")
+                _eventsReady.value = true
+            }
+            .addOnFailureListener {
+                _eventResults.value = listOf()
+            }
         _loading.value = false
     }
 

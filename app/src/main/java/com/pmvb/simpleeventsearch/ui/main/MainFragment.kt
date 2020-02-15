@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pmvb.simpleeventsearch.R
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
+import com.pmvb.simpleeventsearch.util.observeOnce
 import kotlinx.android.synthetic.main.main_fragment.*
 
 class MainFragment : Fragment() {
@@ -37,7 +38,7 @@ class MainFragment : Fragment() {
     }
 
     private fun setupViewModel() {
-        viewModel.loading.observe(requireActivity(), Observer {
+        viewModel.loading.observe(viewLifecycleOwner, Observer {
             if (it) {
                 progressBar.visibility = View.VISIBLE
             } else {
@@ -62,7 +63,7 @@ class MainFragment : Fragment() {
             }
         })
 
-        viewModel.eventsReady.observe(viewLifecycleOwner, Observer {
+        viewModel.eventsReady.observeOnce(viewLifecycleOwner, Observer {
             if (it) {
                 parentFragmentManager
                     .beginTransaction()
