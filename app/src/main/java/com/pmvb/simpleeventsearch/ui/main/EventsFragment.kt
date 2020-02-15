@@ -42,7 +42,7 @@ class EventsFragment : Fragment() {
             }
         })
 
-        viewModel.selectedEvent.observeOnce(viewLifecycleOwner, Observer {
+        viewModel.selectedEvent.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 goToEventDetail(it)
             }

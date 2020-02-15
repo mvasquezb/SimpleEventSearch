@@ -44,10 +44,10 @@ class EventDetailFragment : Fragment() {
         eventLocation.text = event.location
         eventStartDate.text = event.startDate?.format("yyyy-MM-dd HH:mm") ?: "TBA"
         if (event.endDate != null) {
-            endDateContainer.visibility = View.GONE
-        } else {
             endDateContainer.visibility = View.VISIBLE
-            eventEndDate.text = event.startDate?.format("yyyy-MM-dd HH:mm") ?: "TBA"
+            eventEndDate.text = event.endDate.format("yyyy-MM-dd HH:mm")
+        } else {
+            endDateContainer.visibility = View.GONE
         }
         eventSource.text = event.source
         if (event.url != null) {
