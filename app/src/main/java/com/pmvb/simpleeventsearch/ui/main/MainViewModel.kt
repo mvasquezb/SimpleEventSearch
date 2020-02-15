@@ -1,9 +1,11 @@
 package com.pmvb.simpleeventsearch.ui.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.libraries.places.api.model.AutocompletePrediction
+import com.pmvb.simpleeventsearch.data.base.PlaceEvent
 import com.pmvb.simpleeventsearch.data.base.PlaceResult
 import com.pmvb.simpleeventsearch.util.PlacesApiClient
 
@@ -14,9 +16,14 @@ class MainViewModel : ViewModel() {
     val loading: LiveData<Boolean> = _loading
     private val _placeError = MutableLiveData<Exception>()
     val placeError: LiveData<Exception> = _placeError
+    private val _eventsReady = MutableLiveData<Boolean>().apply { value = false }
+    val eventsReady: LiveData<Boolean> = _eventsReady
+    private val _eventResults = MutableLiveData<List<PlaceEvent>>()
+    val eventResults: LiveData<List<PlaceEvent>> = _eventResults
 
     private val placesClient = PlacesApiClient()
     var selectedPlace: PlaceResult? = null
+    var selectedRadius: Int = 0
 
     private fun searchPlace(query: String) {
         _placeError.value = null
@@ -46,6 +53,20 @@ class MainViewModel : ViewModel() {
         if (query.isNotEmpty()) {
             searchPlace(query)
         }
+    }
+
+    fun onSearch() {
+        val (place, radius) = selectedPlace to selectedRadius
+        if (place != null && radius > 0) {
+            searchEvents(place, radius)
+        }
+    }
+
+    private fun searchEvents(place: PlaceResult, radius: Int) {
+        _loading.value = true
+        _eventsReady.value = true
+        _eventResults.value = listOf()
+        _loading.value = false
     }
 
     companion object {

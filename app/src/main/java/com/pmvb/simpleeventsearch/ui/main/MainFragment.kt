@@ -1,15 +1,14 @@
 package com.pmvb.simpleeventsearch.ui.main
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.pmvb.simpleeventsearch.R
@@ -20,6 +19,7 @@ class MainFragment : Fragment() {
 
     companion object {
         fun newInstance() = MainFragment()
+        const val IME_ACTION_CODE = 123
     }
 
     private lateinit var viewModel: MainViewModel
@@ -31,7 +31,7 @@ class MainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         setupViewModel()
     }
@@ -45,7 +45,7 @@ class MainFragment : Fragment() {
             }
         })
 
-        viewModel.placeResults.observe(requireActivity(), Observer {
+        viewModel.placeResults.observe(viewLifecycleOwner, Observer {
             if (it?.isNotEmpty() == true) {
                 setupPlaceResults(it)
             } else {
@@ -53,12 +53,22 @@ class MainFragment : Fragment() {
             }
         })
 
-        viewModel.placeError.observe(requireActivity(), Observer {
+        viewModel.placeError.observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 it.printStackTrace()
                 showEmptyPlaceholder(it.message)
             } else {
                 emptyPlaceholder.visibility = View.GONE
+            }
+        })
+
+        viewModel.eventsReady.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, EventsFragment.newInstance())
+                    .addToBackStack(EventsFragment.TAG)
+                    .commit()
             }
         })
     }
@@ -100,6 +110,21 @@ class MainFragment : Fragment() {
                 emptyPlaceholder.visibility = View.GONE
                 selectionContainer.visibility = View.GONE
             }
+        }
+
+        radiusField.setOnEditorActionListener { textView, actionCode, keyEvent ->
+            when (actionCode) {
+                IME_ACTION_CODE -> {
+                    viewModel.selectedRadius = textView.text.toString().toInt()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        searchButton.setOnClickListener {
+            radiusField.onEditorAction(IME_ACTION_CODE)
+            viewModel.onSearch()
         }
     }
 }

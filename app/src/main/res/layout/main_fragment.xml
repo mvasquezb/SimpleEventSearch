@@ -24,26 +24,39 @@
         android:id="@+id/selectionContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:visibility="gone"
-        android:gravity="center_vertical|fill_horizontal"
         app:layout_constraintTop_toBottomOf="@+id/searchField"
         app:layout_constraintLeft_toLeftOf="parent">
 
-        <TextView
-            android:id="@+id/selectedText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical|fill_horizontal">
 
-        <EditText
-            android:id="@+id/radiusField"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/selectedText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"/>
+
+            <EditText
+                android:id="@+id/radiusField"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:hint="@string/hint_radius_in_km"
+                android:layout_gravity="center|end"
+                android:inputType="number" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/searchButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Radius in km"
-            android:layout_gravity="center|end"
-            android:inputType="number"/>
-
+            android:text="@string/cta_search_events"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
