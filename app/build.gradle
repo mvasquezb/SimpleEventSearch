@@ -54,6 +54,9 @@ dependencies {
     // Places
     implementation 'com.google.android.libraries.places:places:2.2.0'
 
+    // Networking
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

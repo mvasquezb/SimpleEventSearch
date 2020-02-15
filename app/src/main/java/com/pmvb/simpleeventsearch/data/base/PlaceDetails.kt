@@ -7,5 +7,6 @@ data class PlaceDetails(
     val latLng: Pair<Double, Double>,
     val zipCode: String,
     val city: String,
-    val country: String
+    val country: String,
+    val countryCode: String
 )
